@@ -1,10 +1,18 @@
 # Causal ML for Climate Policy Effectiveness
 
+[![License](https://img.shields.io/github/license/prakash-ukhalkar/causal-climate-policy-ml?style=flat-square&color=blue)](https://github.com/prakash-ukhalkar/causal-climate-policy-ml)
+[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
+[![Causal ML](https://img.shields.io/badge/Methodology-Causal%20ML-orange?style=flat-square)](https://github.com/microsoft/EconML)
+[![GitHub Stars](https://img.shields.io/github/stars/prakash-ukhalkar/causal-climate-policy-ml?style=flat-square)](https://github.com/prakash-ukhalkar/causal-climate-policy-ml/stargazers)
+[![GitHub Issues](https://img.shields.io/github/issues/prakash-ukhalkar/causal-climate-policy-ml?style=flat-square)](https://github.com/prakash-ukhalkar/causal-climate-policy-ml/issues)
+
 **Quantifying the Heterogeneous Effects of National Climate Policies on Sectoral CO₂ Emissions Using Causal Machine Learning**
 
-> Target Journal: **Nexus** (ScienceDirect, eISSN: 2950-1601)  
-> Methodology: Double/Debiased ML, Causal Forests, Panel Econometrics  
-> Status:  In Development
+> **Target Journal:** **Nexus** (ScienceDirect, eISSN: 2950-1601)  
+> **Methodology:** Double/Debiased ML, Causal Forests, Panel Econometrics  
+> **Status:** In Development  
+> **Author:** Prakash Ukhalkar ([@prakash-ukhalkar](https://github.com/prakash-ukhalkar))  
+> **Repository:** [causal-climate-policy-ml](https://github.com/prakash-ukhalkar/causal-climate-policy-ml)
 
 ---
 
@@ -384,8 +392,9 @@ Transform results into publication-quality figures and tables ready for the manu
 
 ### Suggested Citation (Draft)
 ```
-[Author]. (2026). Quantifying the Heterogeneous Effects of National Climate
+Ukhalkar, P. (2026). Quantifying the Heterogeneous Effects of National Climate
 Policies on Sectoral CO₂ Emissions Using Causal Machine Learning. Nexus.
+URL: https://github.com/prakash-ukhalkar/causal-climate-policy-ml
 ```
 
 ### Key References
