@@ -1,9 +1,10 @@
 # Causal ML for Climate Policy Effectiveness
 
-[![License](https://img.shields.io/github/license/prakash-ukhalkar/causal-climate-policy-ml?style=flat-square&color=blue)](https://github.com/prakash-ukhalkar/causal-climate-policy-ml/blob/main/LICENSE)
-[![Python Version](https://img.shields.io/badge/python-3.10%2B-blue?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![Causal ML](https://img.shields.io/badge/Methodology-Causal%20ML-orange?style=flat-square)](https://github.com/microsoft/EconML)
-
+[![Author](https://img.shields.io/badge/Author-Prakash%20Ukhalkar-blue?style=flat-square&logo=github)](https://github.com/prakash-ukhalkar)
+[![Repository](https://img.shields.io/badge/Repository-causal--climate--policy--ml-blueviolet?style=flat-square&logo=github)](https://github.com/prakash-ukhalkar/causal-climate-policy-ml)
+[![Python Version](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![ML Algorithms](https://img.shields.io/badge/Algorithms-DML%20%7C%20Causal%20Forests-orange?style=flat-square)](https://github.com/microsoft/EconML)
+[![Methodology](https://img.shields.io/badge/Methodology-Causal%20Inference-brightgreen?style=flat-square)](https://en.wikipedia.org/wiki/Causal_inference)
 
 **Quantifying the Heterogeneous Effects of National Climate Policies on Sectoral CO₂ Emissions Using Causal Machine Learning**
 
