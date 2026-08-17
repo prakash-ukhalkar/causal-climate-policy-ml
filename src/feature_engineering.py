@@ -150,6 +150,13 @@ def create_outcome_variables(df: pd.DataFrame) -> pd.DataFrame:
     # Log emissions (handle zeros)
     df["log_co2"] = np.log(df["co2"].clip(lower=0.001))
 
+    # Log sector-level emissions (if sector columns are present, e.g. after
+    # merging wdi_sector_emissions.csv in notebook 02)
+    for sector_col in ["co2_power", "co2_transport", "co2_industry", "co2_agriculture"]:
+        if sector_col in df.columns:
+            sector_name = sector_col.replace("co2_", "")
+            df[f"log_co2_{sector_name}"] = np.log(df[sector_col].clip(lower=0.001))
+
     # Emissions intensity
     if "gdp_per_capita" in df.columns:
         # Use gdp_per_capita as the preferred robust metric

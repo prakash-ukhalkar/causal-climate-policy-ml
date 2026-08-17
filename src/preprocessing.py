@@ -226,6 +226,45 @@ def clean_owid_energy(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+def clean_sector_emissions(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Clean the sector-disaggregated CO2 dataset (data/raw/wdi/wdi_sector_emissions.csv).
+
+    This is a country x year panel of CO2 emissions broken out by sector
+    (power, transport, industry, agriculture), covering 1990-2023. It backs
+    the manuscript's "sector-level" analysis; prior to this fix it existed on
+    disk but was never loaded by any notebook, so downstream sector results
+    referencing it (e.g. sector_estimates.csv) were not reproducible from the
+    tracked pipeline.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Raw sector emissions dataframe with columns
+        ['iso3', 'year', 'co2_power', 'co2_transport', 'co2_industry', 'co2_agriculture'].
+
+    Returns
+    -------
+    pd.DataFrame
+        Cleaned sector panel, restricted to iso3/year plus sector columns,
+        years >= 1990, deduplicated on (iso3, year).
+    """
+    df = df.copy()
+
+    expected_sector_cols = ["co2_power", "co2_transport", "co2_industry", "co2_agriculture"]
+    sector_cols = [c for c in expected_sector_cols if c in df.columns]
+
+    df = df.dropna(subset=["iso3", "year"])
+    df = df[df["year"] >= 1990]
+    df = df.drop_duplicates(subset=["iso3", "year"])
+    df = df[["iso3", "year"] + sector_cols].sort_values(["iso3", "year"]).reset_index(drop=True)
+
+    logger.info(f"Cleaned sector emissions: {len(df)} rows, {df['iso3'].nunique()} countries, "
+                f"years {df['year'].min()}-{df['year'].max()}, sectors: {sector_cols}")
+
+    return df
+
+
 def interpolate_panel_gaps(
     df: pd.DataFrame,
     group_col: str = "iso3",
