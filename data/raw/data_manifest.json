@@ -1,31 +1,31 @@
 {
   "owid_co2": {
-    "path": "f:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\owid\\owid-co2-data.csv",
+    "path": "F:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\owid\\owid-co2-data.csv",
     "url": "https://github.com/owid/co2-data",
     "description": "Our World in Data \u2014 CO\u2082 and Greenhouse Gas Emissions",
     "rows": 50411,
     "columns": 79,
     "sha256": "7f78e2b218ce4bb8c538bbec04fdc9a7982e8d40bff972e650df603899edd5f6",
-    "downloaded_at": "2026-06-22T19:11:04.740495"
+    "downloaded_at": "2026-08-17T10:32:57.009095"
   },
   "owid_energy": {
-    "path": "f:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\owid\\owid-energy-data.csv",
+    "path": "F:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\owid\\owid-energy-data.csv",
     "url": "https://github.com/owid/energy-data",
     "description": "Our World in Data \u2014 Energy dataset",
     "rows": 23377,
     "columns": 130,
     "sha256": "266f2e2baad7975351bc9bb4aa061d22b1da9fe4c47d51d2ac6071e01e171f76",
-    "downloaded_at": "2026-06-22T19:11:07.989486"
+    "downloaded_at": "2026-08-17T10:32:57.254005"
   },
   "climate_policy_db": {
-    "path": "f:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\climate_policy_db\\climate_policy_database_policies_export.csv",
+    "path": "F:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\climate_policy_db\\climate_policy_database_policies_export.csv",
     "url": "https://www.climatepolicydatabase.org/",
     "description": "Climate Policy Database \u2014 National climate policies",
     "rows": 6727,
-    "downloaded_at": "2026-06-22T19:11:14.427805"
+    "downloaded_at": "2026-08-17T10:32:57.455806"
   },
   "world_bank": {
-    "path": "f:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\world_bank\\wb_indicators.csv",
+    "path": "F:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\world_bank\\wb_indicators.csv",
     "url": "https://data.worldbank.org/",
     "description": "World Bank Development Indicators \u2014 GDP, population, urbanization, trade",
     "indicators": [
@@ -37,10 +37,10 @@
       "energy_use_per_capita",
       "co2_per_capita_wb"
     ],
-    "downloaded_at": "2026-06-22T19:11:17.739439"
+    "downloaded_at": "2026-08-17T10:32:57.552145"
   },
   "wgi_governance": {
-    "path": "f:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\world_bank\\wgidataset_with_sourcedata-2025.xlsx",
+    "path": "F:\\Nexus_Projects\\causal-climate-policy\\data\\raw\\world_bank\\wgidataset_with_sourcedata-2025.xlsx",
     "url": "https://info.worldbank.org/governance/wgi/",
     "description": "Worldwide Governance Indicators \u2014 Regulatory quality, rule of law, etc.",
     "indicators": [
@@ -49,11 +49,11 @@
       "govt_effectiveness",
       "control_corruption"
     ],
-    "downloaded_at": "2026-06-22T19:11:21.807225"
+    "downloaded_at": "2026-08-17T10:32:57.573298"
   },
   "_metadata": {
     "project": "Causal ML for Climate Policy Effectiveness",
-    "created_at": "2026-06-22T19:11:25.475938",
+    "created_at": "2026-08-17T10:32:57.577999",
     "python_version": "3.10.11 (tags/v3.10.11:7d4cc5a, Apr  5 2023, 00:38:17) [MSC v.1929 64 bit (AMD64)]",
     "total_datasets": 5
   }
