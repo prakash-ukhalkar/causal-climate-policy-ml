@@ -1,0 +1,4 @@
+n_pretrend_periods,n_significant,all_insignificant,treatment
+4,0,True,treat_carbon_pricing
+4,3,False,treat_renewable_mandate
+4,0,True,treat_efficiency_standard
