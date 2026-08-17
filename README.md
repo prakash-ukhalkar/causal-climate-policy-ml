@@ -86,7 +86,8 @@ causal-climate-policy/
 │   ├── 02_data_cleaning.ipynb         # Clean, validate, harmonize
 │   ├── 03_eda.ipynb                   # Exploratory data analysis
 │   ├── 04_feature_engineering.ipynb   # Panel construction & treatment coding
-│   ├── 05_causal_analysis.ipynb       # DML, Causal Forest, ATEs & CATEs
+│   ├── 05_causal_analysis.ipynb       # DML, Causal Forest, ATEs & sector-level estimates
+│   ├── 05b_event_study.ipynb          # Sun-Abraham staggered-adoption event study
 │   ├── 06_robustness_checks.ipynb     # Placebo tests, sensitivity analysis
 │   ├── 07_results_visualization.ipynb # Publication-quality figures & tables
 │   └── 08_paper_tables.ipynb         # Formatted regression/results tables
@@ -96,8 +97,9 @@ causal-climate-policy/
 │   ├── data_loader.py                 # Dataset download & caching utilities
 │   ├── preprocessing.py               # Cleaning & harmonization functions
 │   ├── feature_engineering.py         # Panel construction, treatment coding
-│   ├── causal_models.py               # DML, Causal Forest wrappers
-│   ├── robustness.py                  # Placebo tests, sensitivity analysis
+│   ├── causal_models.py               # DML, Causal Forest wrappers, sector-level runner
+│   ├── event_study.py                 # Sun-Abraham staggered-adoption event study
+│   ├── robustness.py                  # Placebo tests, E-values, Oster's delta
 │   └── visualization.py              # Publication-quality plotting functions
 │
 ├── outputs/                           # Generated outputs
@@ -145,6 +147,7 @@ Each notebook is self-contained but follows a strict sequential pipeline. Below 
 | 2.1 | Clean OWID CO₂ data — handle missing values, validate country codes |
 | 2.2 | Clean Climate TRACE — standardize sector names, resolve unit inconsistencies |
 | 2.3 | Clean Climate Policy Database — parse policy types, adoption years, sectors |
+| 2.3b | Clean sector-disaggregated CO₂ emissions (`wdi_sector_emissions.csv`: Power, Transport, Industry, Agriculture, 1990-2023) |
 | 2.4 | Clean World Bank indicators — interpolate sparse series, validate ranges |
 | 2.5 | Harmonize country identifiers across all datasets (ISO 3166-1 alpha-3) |
 | 2.6 | Standardize time dimension (annual, calendar year) |
@@ -203,12 +206,27 @@ Each notebook is self-contained but follows a strict sequential pipeline. Below 
 | 5.2 | **Double/Debiased ML (DML):** Estimate ATE using `econml.dml.LinearDML` and `NonParamDML` with XGBoost/Random Forest first stages |
 | 5.3 | **Causal Forest:** Estimate CATEs using `econml.grf.CausalForest` — how effects vary by country characteristics |
 | 5.4 | **DML with multiple treatments:** Separate estimates for carbon taxes, renewable mandates, efficiency standards |
-| 5.5 | **Temporal heterogeneity:** Estimate effects by policy age (1yr, 3yr, 5yr post-adoption) |
-| 5.6 | **Sector-specific analysis:** Run separate models for power, transport, industry, agriculture |
-| 5.7 | Collect all estimates with confidence intervals |
-| 5.8 | Compare DML vs. OLS vs. Causal Forest estimates — method sensitivity |
+| 5.5 | **Sector-specific analysis:** `run_models_by_sector` reruns the same OLS/DML functions on power, transport, industry, agriculture outcomes — deliberately reusing the national estimators (not a separate script) so sector results share one sign/outcome convention with the national ATE |
 
-**Output:** Estimated ATEs, CATEs, confidence intervals, model comparison tables
+**Output:** Estimated ATEs, CATEs, sector-level estimates, confidence intervals, model comparison tables (`method_comparison.csv`, `sector_estimates.csv`)
+
+The main method-comparison table (Table 3) uses the **Extended** covariate specification (adds `regulatory_quality`, `renewables_share_energy`), restricting N to 2,028 — this is the same sample/spec as the "Extended" row of the Notebook 06 robustness ladder, so Table 3 and Table 4 are directly comparable by construction.
+
+---
+
+### `05b_event_study.ipynb` — Staggered-Adoption Event Study
+
+**Purpose:** Complement the cross-sectional unconfoundedness design above with a genuinely dynamic design and a formal parallel-trends test.
+
+| Step | Description |
+|------|-------------|
+| 5b.1 | Sun & Abraham (2021) interaction-weighted event study per treatment type: cohort × event-time interactions (window -5 to +5, reference period t-1), aggregated with never-treated units as the comparison group |
+| 5b.2 | Event-study coefficient plot for the primary treatment (carbon pricing) |
+| 5b.3 | Pre-trend test (are pre-treatment leads statistically flat?) and cross-check against the Notebook 05 cross-sectional ATE |
+
+Cohorts adopted at/before the panel's earliest observed year are dropped (`src/event_study.py`) — such units have no observed pre-period, so their unit fixed effect is not separable from their treatment effect and materially biases the aggregate estimate if included.
+
+**Output:** `event_study_<treatment>.csv`, `event_study_pretrend_summary.csv`, `event_study.png`/`.pdf`
 
 ---
 
@@ -218,16 +236,13 @@ Each notebook is self-contained but follows a strict sequential pipeline. Below 
 
 | Step | Description |
 |------|-------------|
-| 6.1 | **Placebo test (time):** Estimate treatment effects in pre-policy periods (should be ≈ 0) |
-| 6.2 | **Placebo test (outcome):** Test policy effect on unrelated outcomes (e.g., population growth) |
-| 6.3 | **Leave-one-out:** Sequentially drop largest countries, check estimate stability |
-| 6.4 | **Alternative treatment coding:** Binary vs. continuous, different adoption year thresholds |
-| 6.5 | **Alternative ML first stages:** Swap XGBoost for Random Forest, Lasso, Ridge in DML |
-| 6.6 | **Sensitivity to unobserved confounding:** Rosenbaum bounds / partial R² approach |
-| 6.7 | **Sample restrictions:** OECD-only, non-OECD-only, post-2000 only |
-| 6.8 | Summary table of all robustness checks |
+| 6.1 | **Placebo test (time):** Shift each unit's own adoption year backward (`placebo_test_time`, per-country — not a pooled-column shift); pre-policy pseudo-effects should be ≈ 0 |
+| 6.1b | **Placebo test (outcome):** Test policy effect on plausibly-unrelated outcomes (`urban_pct`, `trade_pct_gdp`) |
+| 6.2 | **Leave-one-out:** Sequentially drop largest countries, check estimate stability |
+| 6.3 | **Alternative specifications:** Minimal / Baseline / Extended covariate ladder |
+| 6.4 | **Sensitivity to unobserved confounding:** E-values (VanderWeele & Ding, 2017) and Oster's (2019) delta, computed from the Baseline→Extended specification ladder |
 
-**Output:** Robustness tables, placebo plots, sensitivity analysis figures
+**Output:** `placebo_test_time.csv`/figure, `placebo_test_outcome.csv`, `leave_one_out.csv`/figure, `alternative_specifications.csv`, `table_sensitivity.csv`
 
 ---
 
@@ -280,6 +295,7 @@ Each notebook is self-contained but follows a strict sequential pipeline. Below 
 | **Our World in Data — Energy** | OWID | [github.com/owid/energy-data](https://github.com/owid/energy-data) | Energy mix, renewables share, consumption |
 | **World Bank WDI** | World Bank | [databank.worldbank.org](https://databank.worldbank.org/) | GDP, population, urbanization, trade |
 | **WGI Governance** | World Bank | [info.worldbank.org/governance/wgi](https://info.worldbank.org/governance/wgi/) | Regulatory quality, rule of law, gov. effectiveness |
+| **Sector CO₂ Emissions** | `data/raw/wdi/wdi_sector_emissions.csv` | (local) | Power/Transport/Industry/Agriculture CO₂ by country-year, 1990-2023 |
 
 ---
 
@@ -372,18 +388,19 @@ Transform results into publication-quality figures and tables ready for the manu
 
 ## Expected Outputs
 
-### Key Findings (Anticipated)
-- **Carbon pricing** reduces power-sector emissions by ~8–15% (causal estimate with CI)
-- **Renewable mandates** show strongest effects in countries with GDP > $15K/capita
-- **Efficiency standards** have delayed effects (significant only after 3+ years)
-- **Agricultural emissions** are largely unresponsive to current policy instruments
-- **Governance quality** is a significant moderator of policy effectiveness
+### Current Findings (as of the latest reproducible run)
+- The cross-sectional unconfoundedness design (OLS/DML/Causal Forest, Notebook 05, Extended spec N=2,028) finds carbon pricing associated with **higher** log-CO₂ (e.g. DML: +0.081, 95% CI [0.051, 0.111]) — plausibly reflecting reverse causality (higher-emitting countries adopt carbon pricing) that this design cannot fully rule out.
+- The staggered-adoption event study (Notebook 05b), which uses each country's own adoption timing and never-treated countries as the comparison group, finds carbon pricing associated with **lower** emissions post-adoption, growing over time (e.g. event_time=0: −0.016; event_time=4: −0.058), with clean, statistically flat pre-treatment leads (0/4 significant) supporting the design's parallel-trends assumption.
+- **These two designs disagree in sign.** This is treated as a genuine, reportable finding about design sensitivity to reverse-causality/endogenous-adoption bias, not reconciled away — see `outputs/tables/event_study_pretrend_summary.csv` and `method_comparison.csv`.
+- The robustness ladder (Notebook 06) shows the effect sign is highly sensitive to covariate specification (Minimal/Baseline: negative; Extended: positive) on different, non-nested samples — Oster's delta for this movement is small (≈ −0.007), and the E-value for the DML estimate (≈ 1.4–1.5) indicates a relatively modest unobserved confounder could shift the result. Both should be reported as explicit limitations.
+- Renewable mandate's event-study pre-trend test fails (3/4 pre-treatment leads significant) — its parallel-trends assumption is not well supported and this should be flagged rather than the estimates reported without caveat.
 
 ### Deliverables
-- [ ] Clean, reproducible Jupyter notebook pipeline (8 notebooks)
-- [ ] Publication-quality figures (8+ figures)
-- [ ] Formatted results tables (7+ tables)
-- [ ] Manuscript-ready methodology description
+- [x] Clean, reproducible Jupyter notebook pipeline (9 notebooks, including 05b) — verified via full `nbconvert --execute` re-run
+- [x] Sector-level estimates generated from a single shared codepath (no sign inconsistency across national/sector tables)
+- [x] Formal confounding-sensitivity analysis (E-values, Oster's delta)
+- [ ] Publication-quality figures finalized for manuscript
+- [ ] Manuscript rewritten to reflect the above (in progress)
 - [ ] Supplementary materials with full robustness checks
 
 ---
