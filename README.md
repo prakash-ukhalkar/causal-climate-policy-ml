@@ -90,7 +90,7 @@ causal-climate-policy/
 │   ├── 05b_event_study.ipynb          # Sun-Abraham staggered-adoption event study
 │   ├── 06_robustness_checks.ipynb     # Placebo tests, sensitivity analysis
 │   ├── 07_results_visualization.ipynb # Publication-quality figures & tables
-│   └── 08_paper_tables.ipynb         # Formatted regression/results tables
+│   └── 08_table_export.ipynb         # Formatted regression/results tables
 │
 ├── src/                               # Reusable Python modules
 │   ├── __init__.py
@@ -266,7 +266,7 @@ Cohorts adopted at/before the panel's earliest observed year are dropped (`src/e
 
 ---
 
-### `08_paper_tables.ipynb` — Formatted Results Tables
+### `08_table_export.ipynb` — Formatted Results Tables
 
 **Purpose:** Generate LaTeX-formatted tables for direct inclusion in the manuscript.
 
