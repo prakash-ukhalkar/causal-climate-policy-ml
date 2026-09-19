@@ -1,9 +1,9 @@
 Method,Treatment,Estimate,Std. Error,95% CI,p-value,N,Significant,Sector
-OLS,treat_carbon_pricing,0.0820,0.0776,"[-0.0701, 0.2341]",0.2908,1950,,power
-DML (xgboost),treat_carbon_pricing,0.0195,0.0212,"[-0.0220, 0.0611]",0.3568,1950,,power
-OLS,treat_carbon_pricing,0.0569,0.0533,"[-0.0476, 0.1613]",0.2857,1950,,transport
-DML (xgboost),treat_carbon_pricing,0.0237,0.0205,"[-0.0166, 0.0640]",0.2489,1950,,transport
-OLS,treat_carbon_pricing,0.0398,0.0874,"[-0.1316, 0.2112]",0.6487,1950,,industry
-DML (xgboost),treat_carbon_pricing,-0.0481,0.0261,"[-0.0992, 0.0031]",0.0654,1950,,industry
-OLS,treat_carbon_pricing,0.2681,0.2105,"[-0.1445, 0.6806]",0.2028,1825,,agriculture
-DML (xgboost),treat_carbon_pricing,-0.0714,0.0710,"[-0.2106, 0.0678]",0.3148,1825,,agriculture
+OLS,treat_carbon_pricing,-0.5626,0.2039,"[-0.9623, -0.1628]",0.0058,6326,***,power
+DML (xgboost),treat_carbon_pricing,-0.1648,0.0734,"[-0.3087, -0.0210]",0.0247,6326,***,power
+OLS,treat_carbon_pricing,-0.3161,0.0760,"[-0.4650, -0.1673]",0.0000,6326,***,transport
+DML (xgboost),treat_carbon_pricing,0.0207,0.0239,"[-0.0261, 0.0675]",0.3862,6326,,transport
+OLS,treat_carbon_pricing,-0.5977,0.1148,"[-0.8226, -0.3727]",0.0000,6326,***,industry
+DML (xgboost),treat_carbon_pricing,-0.0479,0.0432,"[-0.1325, 0.0368]",0.2679,6326,,industry
+OLS,treat_carbon_pricing,0.0703,0.2038,"[-0.3292, 0.4698]",0.7302,3662,,agriculture
+DML (xgboost),treat_carbon_pricing,0.2436,0.0592,"[0.1276, 0.3596]",0.0000,3662,***,agriculture

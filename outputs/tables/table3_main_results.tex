@@ -5,13 +5,13 @@
 \toprule
 Method & Treatment & Estimate & Std. Error & 95% CI & p-value & N & Significant \\
 \midrule
-OLS & treat_carbon_pricing & 0.104600 & 0.050800 & [0.0049, 0.2042] & 0.039700 & 2028 & *** \\
-OLS & treat_renewable_mandate & 0.011900 & 0.043200 & [-0.0728, 0.0966] & 0.782800 & 2028 & NaN \\
-OLS & treat_efficiency_standard & 0.119600 & 0.066700 & [-0.0112, 0.2504] & 0.073100 & 2028 & NaN \\
-DML (xgboost) & treat_carbon_pricing & -0.005700 & 0.009000 & [-0.0234, 0.0119] & 0.524900 & 2028 & NaN \\
-DML (xgboost) & treat_renewable_mandate & -0.014600 & 0.007500 & [-0.0292, -0.0000] & 0.049400 & 2028 & *** \\
-DML (xgboost) & treat_efficiency_standard & 0.007000 & 0.012900 & [-0.0183, 0.0323] & 0.588800 & 2028 & NaN \\
-Causal Forest & treat_carbon_pricing & -0.008100 & 0.035400 & [-0.0776, 0.0613] & 0.818500 & 2028 & NaN \\
+OLS & treat_carbon_pricing & -0.303900 & 0.065100 & [-0.4316, -0.1763] & 0.000000 & 6845 & *** \\
+OLS & treat_renewable_mandate & -0.091900 & 0.047300 & [-0.1847, 0.0008] & 0.052100 & 6845 & NaN \\
+OLS & treat_efficiency_standard & -0.288900 & 0.052900 & [-0.3926, -0.1852] & 0.000000 & 6845 & *** \\
+DML (xgboost) & treat_carbon_pricing & -0.022500 & 0.030300 & [-0.0819, 0.0370] & 0.458600 & 6845 & NaN \\
+DML (xgboost) & treat_renewable_mandate & -0.073800 & 0.027600 & [-0.1279, -0.0197] & 0.007500 & 6845 & *** \\
+DML (xgboost) & treat_efficiency_standard & 0.135900 & 0.029000 & [0.0790, 0.1927] & 0.000000 & 6845 & *** \\
+Causal Forest & treat_carbon_pricing & -0.367600 & 3.238000 & [-6.7140, 5.9787] & 0.909600 & 6845 & NaN \\
 \bottomrule
 \end{tabular}
 \end{table}
