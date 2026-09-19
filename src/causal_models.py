@@ -237,6 +237,17 @@ def run_dml(
     T = data[treatment_col].values.reshape(-1, 1)
     X = None  # No effect modifiers for ATE (use W only)
 
+    # Cross-fitting folds are grouped by country (GroupKFold), not a plain
+    # random KFold. Country-years from the same country are not independent
+    # (persistent, serially correlated unobserved heterogeneity), so a random
+    # per-observation split can place different years of the same country in
+    # both the training and held-out fold simultaneously -- exactly the kind
+    # of within-cluster dependence DML's cross-fitting is meant to guard
+    # against. Grouping by country ensures each country appears in exactly
+    # one fold.
+    from sklearn.model_selection import GroupKFold
+    cv_splits = list(GroupKFold(n_splits=n_folds).split(Y, groups=data["iso3"].values))
+
     # Select first-stage models
     if first_stage_model == "xgboost":
         try:
@@ -264,7 +275,7 @@ def run_dml(
     dml = LinearDML(
         model_y=model_y,
         model_t=model_t,
-        cv=n_folds,
+        cv=cv_splits,
         random_state=42,
     )
 
@@ -359,11 +370,17 @@ def run_causal_forest(
     all_x_cols = list(set(effect_modifier_cols + covariate_cols))
     X_all = data[all_x_cols].values
 
+    # Cross-fitting folds grouped by country -- see the matching note in
+    # run_dml for why a plain random KFold is invalid for panel data.
+    from sklearn.model_selection import GroupKFold
+    cv_splits = list(GroupKFold(n_splits=5).split(Y, groups=data["iso3"].values))
+
     # Fit Causal Forest via the DML wrapper, which provides proper ATE inference
     cf = CausalForestDML(
         model_y=GradientBoostingRegressor(n_estimators=200, max_depth=5, random_state=42),
         model_t=GradientBoostingRegressor(n_estimators=200, max_depth=5, random_state=42),
         n_estimators=n_estimators,
+        cv=cv_splits,
         random_state=42,
         n_jobs=-1,
     )

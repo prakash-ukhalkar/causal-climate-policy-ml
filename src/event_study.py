@@ -216,27 +216,82 @@ def run_event_study(
     })
 
     result_df = pd.DataFrame(results).sort_values("event_time").reset_index(drop=True)
+
+    # Joint Wald test that all pre-treatment event-time estimates are
+    # simultaneously zero -- the formal parallel-trends test. Checking each
+    # pre-period coefficient's own 95% CI against zero one at a time (as an
+    # earlier version of this module did) is a weaker screen than a joint
+    # test: coefficients can each individually miss significance while still
+    # being jointly inconsistent with a flat pre-trend, since it ignores
+    # their covariance. Built here (not in a separate function) because it
+    # needs the fitted model's full parameter covariance matrix, which is
+    # not retained after this function returns.
+    pre_periods = [et for et in event_times if et < reference_period]
+    if pre_periods:
+        R_rows = []
+        for et in pre_periods:
+            cols_for_et = [c for c in interaction_cols if c.endswith(f"_{et:+d}")]
+            weights = np.array([X_interactions[c].sum() for c in cols_for_et], dtype=float)
+            weights = weights / weights.sum()
+            row = pd.Series(0.0, index=model.params.index)
+            row[cols_for_et] = weights
+            R_rows.append(row)
+        R = pd.DataFrame(R_rows).values
+        beta = model.params.values
+        cov = model.cov_params().values
+        Rb = R @ beta
+        RcovR = R @ cov @ R.T
+        try:
+            chi2_stat = float(Rb @ np.linalg.solve(RcovR, Rb))
+            from scipy.stats import chi2 as chi2_dist
+            joint_p = float(chi2_dist.sf(chi2_stat, df=len(pre_periods)))
+        except np.linalg.LinAlgError:
+            chi2_stat, joint_p = np.nan, np.nan
+        result_df.attrs["joint_pretrend_test"] = {
+            "chi2": chi2_stat,
+            "df": len(pre_periods),
+            "p_value": joint_p,
+        }
+    else:
+        result_df.attrs["joint_pretrend_test"] = {"chi2": np.nan, "df": 0, "p_value": np.nan}
+
     return result_df
 
 
 def pretrend_test(event_study_results: pd.DataFrame, reference_period: int = -1) -> dict:
     """
-    Joint test that all pre-treatment (event_time < reference_period) leads
-    are zero -- the formal parallel-trends check for the event study.
+    Parallel-trends check for the event study: are the pre-treatment
+    (event_time < reference_period) leads consistent with zero?
 
-    Uses a simple Wald-style check: are all pre-period estimates within their
-    own 95% CI of zero? (A full joint F-test would require the raw covariance
-    matrix from `run_event_study`; this provides a quick per-coefficient
-    screen suitable for a diagnostic table.)
+    Reports both (a) a per-coefficient screen -- how many pre-period
+    estimates individually exclude zero at the 95% level -- and (b) the
+    formal joint Wald test that all pre-period coefficients are
+    *simultaneously* zero, computed in `run_event_study` from the fitted
+    model's full covariance matrix and attached via `.attrs`. The two can
+    disagree: coefficients can each individually miss significance while
+    still being jointly inconsistent with a flat pre-trend, since the
+    per-coefficient screen ignores covariance between them. The joint test
+    is the one that should be treated as the actual parallel-trends check;
+    the per-coefficient count is retained for descriptive purposes only.
 
     Returns
     -------
-    dict with 'n_pretrend_periods', 'n_significant', 'all_insignificant' (bool).
+    dict with 'n_pretrend_periods', 'n_significant', 'all_insignificant'
+    (per-coefficient), plus 'joint_chi2', 'joint_df', 'joint_p_value',
+    'joint_test_passes' (True if joint p-value > 0.05).
     """
     pre = event_study_results[event_study_results["event_time"] < reference_period]
     n_sig = int(((pre["ci_lower"] > 0) | (pre["ci_upper"] < 0)).sum())
+    joint = event_study_results.attrs.get(
+        "joint_pretrend_test", {"chi2": np.nan, "df": np.nan, "p_value": np.nan}
+    )
+    joint_p = joint.get("p_value", np.nan)
     return {
         "n_pretrend_periods": len(pre),
         "n_significant": n_sig,
         "all_insignificant": n_sig == 0,
+        "joint_chi2": joint.get("chi2", np.nan),
+        "joint_df": joint.get("df", np.nan),
+        "joint_p_value": joint_p,
+        "joint_test_passes": bool(joint_p > 0.05) if pd.notna(joint_p) else None,
     }
