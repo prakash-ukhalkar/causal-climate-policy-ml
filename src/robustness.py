@@ -44,6 +44,18 @@ def placebo_test_time(
     country's treatment status into another's row) and did not respect each
     country's own staggered adoption timing.
 
+    Each unit-year with an actual adoption year is restricted to its
+    pre-actual-adoption window (year < actual adoption year) before the
+    placebo indicator is applied. Without this restriction, the placebo
+    indicator `year >= placebo_adoption_year` is absorbing and never turns
+    back off, so it also covers every year from the *true* adoption year
+    onward — i.e. the "placebo-treated" group is mostly genuinely treated
+    observations with a few extra pre-years mixed in, not a pre-treatment
+    pseudo-effect at all. On this project's real panel, an unrestricted
+    shift of -3 put 87% of "placebo-treated" observations after the true
+    adoption date, which mechanically produced large, significant "placebo"
+    estimates that were really just the true effect leaking through.
+
     Parameters
     ----------
     df : pd.DataFrame
@@ -89,11 +101,23 @@ def placebo_test_time(
             # placebo adoption year is 3 years before the true one.
             placebo_adoption_year = adoption_year + shift
             df_placebo["_placebo_adoption_year"] = df_placebo[unit_col].map(placebo_adoption_year)
+            df_placebo["_actual_adoption_year"] = df_placebo[unit_col].map(adoption_year)
+
+            # Restrict to each unit's pre-actual-adoption window so the
+            # placebo indicator cannot pick up genuinely treated years
+            # (never-adopting units have no actual adoption year and are
+            # kept in full as the untreated comparison group).
+            pre_period_mask = (
+                df_placebo["_actual_adoption_year"].isna()
+                | (df_placebo[time_col] < df_placebo["_actual_adoption_year"])
+            )
+            df_placebo = df_placebo.loc[pre_period_mask].copy()
+
             df_placebo[treatment_col] = (
                 (df_placebo["_placebo_adoption_year"].notna())
                 & (df_placebo[time_col] >= df_placebo["_placebo_adoption_year"])
             ).astype(int)
-            df_placebo = df_placebo.drop(columns=["_placebo_adoption_year"])
+            df_placebo = df_placebo.drop(columns=["_placebo_adoption_year", "_actual_adoption_year"])
         else:
             label = "Actual"
 
