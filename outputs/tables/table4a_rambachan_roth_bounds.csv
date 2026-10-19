@@ -1,0 +1,9 @@
+lb,ub,method,Delta,Mbar,target
+-0.1147,0.0881,C-LF,DeltaRM,0.5,t=0 (immediate)
+-0.1165,0.1165,C-LF,DeltaRM,1.0,t=0 (immediate)
+-0.1165,0.1165,C-LF,DeltaRM,1.5,t=0 (immediate)
+-0.1165,0.1165,C-LF,DeltaRM,2.0,t=0 (immediate)
+-0.7932,0.0992,C-LF,DeltaRM,0.5,"t=5 (largest, last post-period)"
+-0.7932,0.6852,C-LF,DeltaRM,1.0,"t=5 (largest, last post-period)"
+-0.7932,0.7932,C-LF,DeltaRM,1.5,"t=5 (largest, last post-period)"
+-0.7932,0.7932,C-LF,DeltaRM,2.0,"t=5 (largest, last post-period)"
