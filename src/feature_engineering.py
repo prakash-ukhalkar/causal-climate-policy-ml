@@ -260,7 +260,7 @@ def build_analysis_panel(
 
     # Add treatment variables
     treat_cols = ["iso3", "year"] + [c for c in treatment_df.columns
-                                      if c.startswith(("treat_", "years_since_"))]
+                                      if c.startswith(("treat_", "years_since_", "adoption_year"))]
     panel = panel.merge(
         treatment_df[treat_cols],
         on=["iso3", "year"],

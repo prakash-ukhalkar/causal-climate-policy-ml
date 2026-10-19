@@ -61,6 +61,7 @@ def run_event_study(
     covariate_cols: list = None,
     window: tuple = (-5, 5),
     reference_period: int = -1,
+    unit_specific_trends: bool = False,
 ) -> pd.DataFrame:
     """
     Sun & Abraham (2021) interaction-weighted staggered-adoption event study.
@@ -95,6 +96,16 @@ def run_event_study(
     reference_period : int
         Omitted (baseline) relative event-time period, conventionally -1
         (the year immediately before adoption).
+    unit_specific_trends : bool
+        If True, add a unit-specific linear time trend (unit dummy x
+        centered year) for every unit, on top of the unit/year fixed
+        effects. This is the standard diagnostic/fix for a differential
+        pre-trend: if treated and control units were already on different
+        linear trajectories for reasons unrelated to treatment, allowing
+        each unit its own trend absorbs that difference before estimating
+        the event-time effects, rather than attributing it to treatment.
+        Adds one parameter per unit, so only use with a large N relative to
+        the number of units.
 
     Returns
     -------
@@ -164,6 +175,12 @@ def run_event_study(
     X = pd.concat([X_interactions, unit_dummies, year_dummies], axis=1)
     if covariate_cols:
         X = pd.concat([X, data[covariate_cols].astype(float)], axis=1)
+
+    if unit_specific_trends:
+        centered_year = data[time_col] - data[time_col].mean()
+        trend_terms = unit_dummies.multiply(centered_year, axis=0)
+        trend_terms.columns = [f"{c}_trend" for c in trend_terms.columns]
+        X = pd.concat([X, trend_terms], axis=1)
     X = sm.add_constant(X).astype(float)
     y = data[outcome_col].astype(float)
 
@@ -254,6 +271,33 @@ def run_event_study(
         }
     else:
         result_df.attrs["joint_pretrend_test"] = {"chi2": np.nan, "df": 0, "p_value": np.nan}
+
+    # Full aggregated covariance matrix across ALL non-reference event
+    # times (pre- and post-treatment), needed for Rambachan & Roth (2023)
+    # sensitivity bounds -- those require the joint covariance of the whole
+    # estimated vector, not just each period's own SE, since the bound
+    # reasons about how a given degree of pre-trend violation propagates
+    # into the post-period estimates under their shared covariance
+    # structure. Built the same way as the joint pre-trend test's R matrix
+    # above, just extended to every non-reference event time instead of
+    # only the pre-periods.
+    non_reference_times = [et for et in event_times if et != reference_period]
+    R_full_rows = []
+    for et in non_reference_times:
+        cols_for_et = [c for c in interaction_cols if c.endswith(f"_{et:+d}")]
+        weights = np.array([X_interactions[c].sum() for c in cols_for_et], dtype=float)
+        weights = weights / weights.sum()
+        row = pd.Series(0.0, index=model.params.index)
+        row[cols_for_et] = weights
+        R_full_rows.append(row)
+    R_full = pd.DataFrame(R_full_rows).values
+    cov_full = model.cov_params().values
+    sigma_full = R_full @ cov_full @ R_full.T
+
+    result_df.attrs["event_time_cov_matrix"] = {
+        "event_times": non_reference_times,
+        "sigma": sigma_full,
+    }
 
     return result_df
 

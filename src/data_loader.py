@@ -152,6 +152,44 @@ def load_owid_energy() -> pd.DataFrame:
     return pd.read_csv(path)
 
 
+def load_wcpd_national() -> pd.DataFrame:
+    """
+    Load the World Carbon Pricing Database (WCPD) national jurisdiction files
+    and concatenate them into a single sector-fuel-level panel.
+
+    Source: Dolphin, G., Xiahou, Q. (2022). World carbon pricing database:
+    sources and methods. Scientific Data, 9, 573.
+    https://doi.org/10.1038/s41597-022-01659-x
+    Pinned release: v2025.0.0 (see data/raw/data_manifest.json for the
+    commit SHA and combined checksum used in this project).
+
+    Each row is one jurisdiction-year-IPCC_sector-fuel record, with binary
+    `tax`/`ets` coverage flags and an explicit price
+    (`tax_rate_incl_ex_clcu`, `ets_price`). Aggregation to a single
+    country-year treatment indicator happens in `src.preprocessing`, not
+    here — this function only loads and concatenates the raw records.
+
+    Returns
+    -------
+    pd.DataFrame
+        Concatenated WCPD panel across all 201 jurisdiction files.
+    """
+    wcpd_dir = RAW_DIR / "wcpd" / "national"
+    if not wcpd_dir.exists():
+        raise FileNotFoundError(f"WCPD directory not found: {wcpd_dir}. Run download first.")
+
+    files = sorted(wcpd_dir.glob("wcpd_co2_*.csv"))
+    if not files:
+        raise FileNotFoundError(f"No WCPD jurisdiction files found in: {wcpd_dir}")
+
+    frames = [pd.read_csv(f) for f in files]
+    df = pd.concat(frames, ignore_index=True)
+    logger.info(f"Loaded WCPD: {len(df)} sector-fuel-year records, "
+                f"{df['jurisdiction'].nunique()} jurisdictions, "
+                f"{df['year'].min()}-{df['year'].max()}")
+    return df
+
+
 def load_interim(filename: str) -> pd.DataFrame:
     """Load a cleaned interim dataset."""
     path = INTERIM_DIR / filename
